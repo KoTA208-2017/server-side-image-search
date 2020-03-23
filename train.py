@@ -25,12 +25,12 @@ def train(model):
     """Train the model."""
     # Training dataset.
     dataset_train = FashionDataset()
-    dataset_train.load_data(args.dataset+"/train.json", "train")
+    dataset_train.load_data(args.dataset+"/train.json", args.dataset+"train")
     dataset_train.prepare()
 
     # Validation dataset
     dataset_val = FashionDataset()
-    dataset_val.load_data(args.dataset+"/validation.json", "val")
+    dataset_val.load_data(args.dataset+"/validation.json", args.dataset+"val")
     dataset_val.prepare()
 
     # *** This training schedule is an example. Update to your needs ***
