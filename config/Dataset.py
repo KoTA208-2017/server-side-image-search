@@ -2,7 +2,7 @@ import os
 import json
 from mrcnn import utils
 
-class CocoLikeDataset(utils.Dataset):
+class FashionDataset(utils.Dataset):
     """ Generates a COCO-like dataset, i.e. an image dataset annotated in the style of the COCO dataset.
         See http://cocodataset.org/#home for more information.
     """
