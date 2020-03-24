@@ -1,6 +1,7 @@
 import os
 import json
 from mrcnn import utils
+import numpy as np
 from PIL import Image, ImageDraw
 
 class FashionDataset(utils.Dataset):
