@@ -1,6 +1,7 @@
 import os
 import json
 from mrcnn import utils
+from PIL import Image, ImageDraw
 
 class FashionDataset(utils.Dataset):
     """ Generates a COCO-like dataset, i.e. an image dataset annotated in the style of the COCO dataset.
