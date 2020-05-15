@@ -9,8 +9,8 @@ from mrcnn.visualize import display_images
 import mrcnn.model as modellib
 from mrcnn.model import log
 
-from config.FashionConfig import FashionConfig
-from config.Dataset import FashionDataset
+from config.fashion_config import FashionConfig
+from config.dataset import FashionDataset
 
 # Path to trained weights file
 COCO_WEIGHTS_PATH = os.path.join("", "weight/mask_rcnn_coco.h5")
