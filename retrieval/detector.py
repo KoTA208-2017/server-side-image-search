@@ -25,21 +25,6 @@ class Detector:
 		
 		self.model.load_weights(model_path, by_name=True)
 
-	def detection(self, image): 
-		if not isinstance(image, np.ndarray):
-			raise ValueError("Input is incorrect")
-
-		# Run detection
-		start = time.time()
-		detection_results = self.model.detect([image], verbose=1)
-		end = time.time()
-
-		# Results
-		print("Cost time: ",end-start," (s)")
-		result = detection_results[0]
-		
-		return result
-
 	def train(self, model, config):    
     	# Dataset
 		dataset_train = FashionDataset()
@@ -54,9 +39,42 @@ class Detector:
 	    # Training
 		print("Training network heads")
 		model.train(dataset_train, dataset_val, 
-	    	learning_rate=config.LEARNING_RATE,
-	    	epochs=15, layers='heads')
+			learning_rate=config.LEARNING_RATE,
+			epochs=15, layers='heads')
 
 		model.train(dataset_train, dataset_val,
 			learning_rate=config.LEARNING_RATE / 10,
 			epochs=30, layers="all")
+
+	def detection(self, image): 
+		# Handle wrong input
+		if not isinstance(image, np.ndarray):
+			raise ValueError("Input is incorrect")
+
+		# Run detection
+		start = time.time()
+		detection_results = self.model.detect([image], verbose=1)
+		end = time.time()
+
+		# Results
+		print("Cost time: ",end-start," (s)")
+		result = detection_results[0]
+		
+		return result
+
+
+	def get_width(self, xy):
+		width = abs(xy[1] - xy[3])
+		return width
+
+	def get_height(self, xy):
+		height = abs(xy[0] - xy[2])
+		return height
+
+	def get_area(self, xy):
+		width = self.get_width(xy)
+		height = self.get_height(xy)
+		area = width * height
+		return area
+
+		
