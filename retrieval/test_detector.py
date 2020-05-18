@@ -44,4 +44,11 @@ class TestDetector(unittest.TestCase):
 		biggest_box = detector.get_biggest_box(detection_result['rois'])
 		self.assertIsInstance(biggest_box, np.ndarray)
 
+	def test_crop_object(self):
+		image = skimage.io.imread("test.jpg")
+		detection_result = detector.detection(image) 	
+		biggest_box = detector.get_biggest_box(detection_result['rois'])
+		resized = detector.crop_object(image, biggest_box)
+
+		self.assertEqual(resized.shape, (224,224,3))
 
