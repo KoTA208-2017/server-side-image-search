@@ -13,14 +13,14 @@ class FashionDataset(utils.Dataset):
         Args:
             annotation_json: The path to the coco annotations json file
             images_dir: The directory holding the images referred to by the json file
-        """
-        # Load json from file
+        """        
         dataset_json = os.path.exists(annotation_json)
         images_dir = os.path.exists(images_dir)
 
         if(not(images_dir) or not(dataset_json)):
             raise ValueError("Dataset Not Found")
         else:
+            # Load json from file
             json_file = open(annotation_json)
             coco_json = json.load(json_file)
             json_file.close()
