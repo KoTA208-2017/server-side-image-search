@@ -1,12 +1,40 @@
 import os
 import sys
+import time
+import skimage.io
+import matplotlib.pyplot as plt
+import tensorflow as tf
+import mrcnn.model as modellib
+
 # Path to Datasets
 DEFAULT_DATASETS_DIR = os.path.join("", "../../../../datasets")
 
 sys.path.insert(0, "../")
 from config.dataset import FashionDataset
+from config.fashion_config import FashionConfig
 
 class Detector:
+	def __init__(self, model_path):
+		config = FashionConfig()  
+
+		self.class_names = ['BG', 'top', 'long', 'bottom']
+		# Using GPU
+		with tf.device('/gpu:0'):
+			self.model = modellib.MaskRCNN(mode="inference", config=config, model_dir="")
+		
+		self.model.load_weights(model_path, by_name=True)
+
+	def detection(self, image):    	
+		# Run detection
+		start = time.time()
+		detection_results = self.model.detect([image], verbose=1)
+		end = time.time()
+
+		# Results
+		print("Cost time: ",end-start," (s)")
+		result = detection_results[0]
+		
+		return result
 
 	def train(self, model, config):    
     	# Dataset
