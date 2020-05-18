@@ -5,6 +5,7 @@ import skimage.io
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import mrcnn.model as modellib
+import numpy as np
 
 # Path to Datasets
 DEFAULT_DATASETS_DIR = os.path.join("", "../../../../datasets")
@@ -24,7 +25,10 @@ class Detector:
 		
 		self.model.load_weights(model_path, by_name=True)
 
-	def detection(self, image):    	
+	def detection(self, image): 
+		if not isinstance(image, np.ndarray):
+			raise ValueError("Input is incorrect")
+
 		# Run detection
 		start = time.time()
 		detection_results = self.model.detect([image], verbose=1)
