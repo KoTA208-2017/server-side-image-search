@@ -89,4 +89,10 @@ class Detector:
 				ix = i
 		return biggest_xy
 
+	def crop_object(self, img, xy):    
+		target = img[xy[0]:xy[2], xy[1]:xy[3], :]
+		# Resize to 224 x 224
+		resized = skimage.transform.resize(target, (224, 224), preserve_range=True)
+		return resized
+
 
