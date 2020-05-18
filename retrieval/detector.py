@@ -50,6 +50,8 @@ class Detector:
 		# Handle wrong input
 		if not isinstance(image, np.ndarray):
 			raise ValueError("Input is incorrect")
+			print("bel")
+			return None
 
 		# Run detection
 		start = time.time()
@@ -77,4 +79,14 @@ class Detector:
 		area = width * height
 		return area
 
-		
+	def get_biggest_box(self, xy_list):
+		biggest_area = 0
+		for i, xy in enumerate(xy_list):
+			area = self.get_area(xy)
+			if area > biggest_area:
+				biggest_area = area
+				biggest_xy = xy
+				ix = i
+		return biggest_xy
+
+
