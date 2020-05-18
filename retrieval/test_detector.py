@@ -9,14 +9,17 @@ class TestDetector(unittest.TestCase):
 	def test_detection(self):
 		# Test with image fashion
 		image = skimage.io.imread("test.jpg")
-		r = detector.detection(image) 
+		detection_result = detector.detection(image) 
 
-		output_length = len(r['rois'])
+		output_length = len(detection_result['rois'])
 		self.assertGreaterEqual(output_length, 1)
 
 	def test_detection_error(self):							
 		image = skimage.io.imread("wall.jpg")
-		r = detector.detection(image)   
+		detection_result = detector.detection(image)   
 
-		output_length = len(r['rois'])
+		output_length = len(detection_result['rois'])
 		self.assertEqual(output_length, 0)
+
+	def test_wrong_input(self):		
+		self.assertRaises(ValueError, detector.detection, "Wrong input")    
