@@ -1,5 +1,6 @@
 import unittest
 import skimage.io
+import numpy as np
 
 from detector import Detector
 
@@ -36,3 +37,11 @@ class TestDetector(unittest.TestCase):
 	def test_get_area_of_object(self):		
 		area = detector.get_area(image_input)
 		self.assertEqual(area, 100)
+
+	def test_get_biggest_box_of_object(self):
+		image = skimage.io.imread("test.jpg")
+		detection_result = detector.detection(image) 	
+		biggest_box = detector.get_biggest_box(detection_result['rois'])
+		self.assertIsInstance(biggest_box, np.ndarray)
+
+
