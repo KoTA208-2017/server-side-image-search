@@ -49,8 +49,7 @@ class Detector:
 	def detection(self, image): 
 		# Handle wrong input
 		if not isinstance(image, np.ndarray):
-			raise ValueError("Input is incorrect")
-			print("bel")
+			raise ValueError("Input is incorrect")			
 			return None
 
 		# Run detection
