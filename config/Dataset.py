@@ -20,57 +20,57 @@ class FashionDataset(utils.Dataset):
 
         if(not(images_dir) or not(dataset_json)):
             raise ValueError("Dataset Not Found")
-
-        json_file = open(annotation_json)
-        coco_json = json.load(json_file)
-        json_file.close()
-        
-        # Add the class names using the base method from utils.Dataset
-        source_name = "coco_like"
-        for category in coco_json['categories']:
-            class_id = category['id']
-            class_name = category['name']
-            if class_id < 1:
-                print('Error: Class id for "{}" cannot be less than one. (0 is reserved for the background)'.format(class_name))
-                return
+        else:
+            json_file = open(annotation_json)
+            coco_json = json.load(json_file)
+            json_file.close()
             
-            self.add_class(source_name, class_id, class_name)
-        
-        # Get all annotations
-        annotations = {}
-        for annotation in coco_json['annotations']:
-            image_id = annotation['image_id']
-            if image_id not in annotations:
-                annotations[image_id] = []
-            annotations[image_id].append(annotation)
-        
-        # Get all images and add them to the dataset
-        seen_images = {}
-        for image in coco_json['images']:
-            image_id = image['id']
-            if image_id in seen_images:
-                print("Warning: Skipping duplicate image id: {}".format(image))
-            else:
-                seen_images[image_id] = image
-                try:
-                    image_file_name = image['file_name']
-                    image_width = image['width']
-                    image_height = image['height']
-                except KeyError as key:
-                    print("Warning: Skipping image (id: {}) with missing key: {}".format(image_id, key))
+            # Add the class names using the base method from utils.Dataset
+            source_name = "coco_like"
+            for category in coco_json['categories']:
+                class_id = category['id']
+                class_name = category['name']
+                if class_id < 1:
+                    print('Error: Class id for "{}" cannot be less than one. (0 is reserved for the background)'.format(class_name))
+                    return
                 
-                image_path = os.path.abspath(os.path.join(images_dir, image_file_name))
-                image_annotations = annotations[image_id]
-                
-                # Add the image using the base method from utils.Dataset
-                self.add_image(
-                    source=source_name,
-                    image_id=image_id,
-                    path=image_path,
-                    width=image_width,
-                    height=image_height,
-                    annotations=image_annotations
-                )
+                self.add_class(source_name, class_id, class_name)
+            
+            # Get all annotations
+            annotations = {}
+            for annotation in coco_json['annotations']:
+                image_id = annotation['image_id']
+                if image_id not in annotations:
+                    annotations[image_id] = []
+                annotations[image_id].append(annotation)
+            
+            # Get all images and add them to the dataset
+            seen_images = {}
+            for image in coco_json['images']:
+                image_id = image['id']
+                if image_id in seen_images:
+                    print("Warning: Skipping duplicate image id: {}".format(image))
+                else:
+                    seen_images[image_id] = image
+                    try:
+                        image_file_name = image['file_name']
+                        image_width = image['width']
+                        image_height = image['height']
+                    except KeyError as key:
+                        print("Warning: Skipping image (id: {}) with missing key: {}".format(image_id, key))
+                    
+                    image_path = os.path.abspath(os.path.join(images_dir, image_file_name))
+                    image_annotations = annotations[image_id]
+                    
+                    # Add the image using the base method from utils.Dataset
+                    self.add_image(
+                        source=source_name,
+                        image_id=image_id,
+                        path=image_path,
+                        width=image_width,
+                        height=image_height,
+                        annotations=image_annotations
+                    )
                 
     def load_mask(self, image_id):
         """ Load instance masks for the given image.

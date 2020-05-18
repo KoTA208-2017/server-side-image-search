@@ -36,5 +36,5 @@ if __name__ == '__main__':
             "mrcnn_bbox", "mrcnn_mask"])    
 
     # Train
-    detector = Detector()
+    detector = Detector("weight/mask_rcnn_fashion.h5")
     detector.train(model, config)    

@@ -21,3 +21,7 @@ class FashionConfig(Config):
     
     # Matterport originally used resnet101, but I downsized to fit it on my graphics card
     IMAGE_MIN_DIM = 512
+    
+    # For Detection
+    DETECTION_MIN_CONFIDENCE = 0.7
+    RPN_ANCHOR_STRIDE = 1
