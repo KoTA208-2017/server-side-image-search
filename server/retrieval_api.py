@@ -27,11 +27,19 @@ def get_extension(filename):
 
 class Retrieval(Resource):	
 	def post(self):
+		
+
+		# no file uploaded
 		if 'file' not in request.files:
-			resp = jsonify({'message' : 'No file part in the request'})
-			resp.status_code = 400
-			return resp
+			response = self.build_response(1, [])
+			return response
+
 		file = request.files['file']		
+		# not allowed file
+		if not (file and allowed_file(file.filename)):
+			response = self.build_response(2, [])
+			return response
+
 		extension = get_extension(file.filename)		
 		# Name file 		
 		milli_sec = int(round(time.time() * 1000))		
@@ -39,6 +47,20 @@ class Retrieval(Resource):
 
 		# Save image to server
 		file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+		data = []					
+		resp = self.build_response(0,data)
+		return resp
+
+	def build_response(self, index_message, data):
+		message = ["success", "no file part in the request", "Please check the uploaded image type, only for jpg, png and jpeg"]
+		code = [200, 400, 400] 		
+
+		resp = jsonify({'data': data,
+				'message' : message[index_message]})
+		resp.status_code = code[index_message]
+		return resp
+
 
 api.add_resource(Retrieval, '/retrieval/image', endpoint='image')
 
