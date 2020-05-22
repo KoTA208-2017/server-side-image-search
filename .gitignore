@@ -5,6 +5,8 @@ logs/
 results/
 temp/
 test/
+server/image/uploads
+server/image/database
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
