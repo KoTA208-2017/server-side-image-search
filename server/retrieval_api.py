@@ -46,13 +46,20 @@ class Retrieval(Resource):
 		# Save image to server
 		file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-		data = []					
-		resp = self.build_response(0,data)
-		return resp
+		data = []	
+		# there is no data				
+		if not data: 
+			response = self.build_response(3,data)
+			return response
+
+		# Success
+		response = self.build_response(0,data)
+		return response
 
 	def build_response(self, index_message, data):
-		message = ["success", "no file part in the request", "Please check the uploaded image type, only for jpg, png and jpeg"]
-		code = [200, 400, 400] 		
+		message = ["success", "no file part in the request", 
+		"Please check the uploaded image type, only for jpg, png and jpeg", "There is no data"]
+		code = [200, 400, 400, 404] 		
 
 		resp = jsonify({'data': data,
 				'message' : message[index_message]})
