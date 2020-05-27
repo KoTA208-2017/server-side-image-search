@@ -56,6 +56,27 @@ class Retrieval(Resource):
 		response = self.build_response(0,data)
 		return response
 
+	def compare_similarity(self, query_feature):
+		# open the product data extraction file
+		path = "../featureCNN_map.h5"
+		h5f = h5py.File(path,'r')
+		feats = h5f['feats'][:]
+		id = h5f['id'][:]
+		h5f.close()	
+		
+		# similarity
+		scores = np.dot(query_feature, feats.T)
+		# sort
+		rank_ID = np.argsort(scores)[::-1]
+		rank_score = scores[rank_ID]
+		id_rank = id[rank_ID]
+		# score > 0.7
+		rank = np.r_[(rank_score>0.7).nonzero()]
+
+		id_rank = id_rank[rank]
+
+		return id_rank
+
 	def build_response(self, index_message, data):
 		message = ["success", "no file part in the request", 
 		"Please check the uploaded image type, only for jpg, png and jpeg", "There is no data"]
