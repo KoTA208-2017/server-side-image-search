@@ -4,7 +4,7 @@ import sys
 import skimage.io
 import numpy as np
 import time
-
+from keras.backend import clear_session
 import urllib.request
 from app import app
 from flask import Flask, request, redirect, jsonify, send_from_directory
@@ -13,8 +13,8 @@ from werkzeug.utils import secure_filename
 from database.database import DAO
 
 sys.path.insert(0, "../retrieval")
-# from detector import Detector
-# import extractor
+from detector import Detector
+import extractor
 
 api = Api(app)
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
@@ -45,13 +45,44 @@ class Retrieval(Resource):
 
 		# Save image to server
 		file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-
 		data = []	
-		# there is no data				
-		if not data: 
+
+		# uploaded image
+		image_path = 'image/uploads/'+filename				
+		# Add Database
+		database = DAO()
+		# open image
+		image = skimage.io.imread(image_path)
+
+		# Object Detection		
+		clear_session()
+		image_detector = Detector("../weight/mask_rcnn_fashion.h5")
+		detection_results = image_detector.detection(image)		
+		# there is no fashion object			
+		if detection_results is None : 
 			response = self.build_response(3,data)
 			return response
 
+		# Dominan Object
+		big_object = image_detector.get_biggest_box(detection_results['rois'])
+		cropped_object = image_detector.crop_object(image, big_object)
+
+		# Extract
+		clear_session()
+		image_extractor = extractor.Extractor()
+		query_image_feature = image_extractor.extract_feat(cropped_object)
+
+		# similarity
+		product_ids = self.compare_similarity(query_image_feature)
+		# there is no data			
+		if not product_ids : 
+			response = self.build_response(3,data)
+			return response
+
+		result = database.getProduct(product_ids)
+		for res in result:
+			data.append(res.to_dict())
+			
 		# Success
 		response = self.build_response(0,data)
 		return response
