@@ -27,8 +27,6 @@ def get_extension(filename):
 
 class Retrieval(Resource):	
 	def post(self):
-		
-
 		# no file uploaded
 		if 'file' not in request.files:
 			response = self.build_response(1, [])
@@ -41,7 +39,7 @@ class Retrieval(Resource):
 			return response
 
 		extension = get_extension(file.filename)		
-		# Name file 		
+		# file name 		
 		milli_sec = int(round(time.time() * 1000))		
 		filename = secure_filename(str(milli_sec)+"."+extension)	
 
@@ -61,8 +59,13 @@ class Retrieval(Resource):
 		resp.status_code = code[index_message]
 		return resp
 
+class ImageServer(Resource):
+	def get(self, filename):
+		return send_from_directory(app.static_folder, filename)
 
-api.add_resource(Retrieval, '/retrieval/image', endpoint='image')
+
+api.add_resource(Retrieval, '/retrieval/image', endpoint='retrieval')
+api.add_resource(ImageServer, '/image/<string:filename>', endpoint='image')
 
 if __name__ == "__main__":
     app.run(host= '0.0.0.0', debug=True)	
