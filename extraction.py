@@ -16,7 +16,7 @@ from retrieval.detector import Detector
 from retrieval.extractor import Extractor
 
 
-IMAGE_PATH = "server/image/database/"
+IMAGE_PATH = "server/image/product_images/"
 
 if __name__ == '__main__':
 	database = DAO()
