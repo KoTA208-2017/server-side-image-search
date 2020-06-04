@@ -6,7 +6,7 @@ results/
 temp/
 test/
 server/image/uploads
-server/image/database
+server/image/product_images
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
