@@ -18,8 +18,8 @@ class DAO:
 		products = q.filter(Product.id.in_(ids)).order_by(func.field(Product.id, *ids))
 		return products
 
-	def insert(self, name, price, image, url, ecommerce):
-		product = Product(name, price, image, url, ecommerce)
+	def insert(self, sitename, name, price, url, image, imageUrl):
+		product = Product(sitename, name, price, url, image, imageUrl)
 		self.session.add(product)
 
 		self.session.commit()
