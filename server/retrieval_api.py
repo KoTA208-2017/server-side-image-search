@@ -58,8 +58,10 @@ class Retrieval(Resource):
 		clear_session()
 		image_detector = Detector("../weight/mask_rcnn_fashion.h5")
 		detection_results = image_detector.detection(image)		
+
+		output_length = len(detection_results['rois'])
 		# there is no fashion object			
-		if detection_results is None : 
+		if output_length == 0 : 
 			response = self.build_response(3,data)
 			return response
 
@@ -74,8 +76,9 @@ class Retrieval(Resource):
 
 		# similarity
 		product_ids = self.compare_similarity(query_image_feature)
+		length = len(product_ids)		
 		# there is no data			
-		if not product_ids : 
+		if length == 0 :  
 			response = self.build_response(3,data)
 			return response
 
@@ -112,11 +115,9 @@ class Retrieval(Resource):
 		message = ["success", "no file part in the request", 
 		"Please check the uploaded image type, only for jpg, png and jpeg", "There is no data"]
 		code = [200, 400, 400, 404] 		
-
-		resp = jsonify({'data': data,
-				'message' : message[index_message]})
-		resp.status_code = code[index_message]
-		return resp
+		
+		return {'data': data,
+				'message' : message[index_message]}, code[index_message]			
 
 class ImageServer(Resource):
 	def get(self, filename):
@@ -127,4 +128,4 @@ api.add_resource(Retrieval, '/retrieval/image', endpoint='retrieval')
 api.add_resource(ImageServer, '/image/<string:filename>', endpoint='image')
 
 if __name__ == "__main__":
-    app.run(host= '0.0.0.0', debug=True)	
+    app.run(host= '0.0.0.0', debug=True) 
