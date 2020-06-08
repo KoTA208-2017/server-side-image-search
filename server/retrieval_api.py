@@ -100,12 +100,16 @@ class Retrieval(Resource):
 		
 		# similarity
 		scores = np.dot(query_feature, feats.T)
-		# sort
+		id_rank = self.sort_by_score(id, scores)
+		
+		return id_rank
+
+	def sort_by_score(self, id, scores):
 		rank_ID = np.argsort(scores)[::-1]
 		rank_score = scores[rank_ID]
 		id_rank = id[rank_ID]
 		# score > 0.7
-		rank = np.r_[(rank_score>0.7).nonzero()]
+		rank = np.r_[(rank_score>0.7).nonzero()]		
 
 		id_rank = id_rank[rank]
 
