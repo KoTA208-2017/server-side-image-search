@@ -52,6 +52,10 @@ class Detector:
 			raise ValueError("Input is incorrect")			
 			return None
 
+		# Check image channel
+		if(image.shape[2] == 4):
+			image = image[...,:3]
+
 		# Run detection
 		start = time.time()
 		detection_results = self.model.detect([image], verbose=1)
