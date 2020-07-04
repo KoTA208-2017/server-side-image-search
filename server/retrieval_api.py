@@ -4,6 +4,7 @@ import sys
 import skimage.io
 import numpy as np
 import time
+import re
 from keras.backend import clear_session
 import urllib.request
 from app import app
@@ -43,6 +44,10 @@ class Retrieval(Resource):
 		milli_sec = int(round(time.time() * 1000))		
 		filename = secure_filename(str(milli_sec)+"."+extension)	
 
+		# make log folder 
+		path = os.path.join("../logs/request", str(milli_sec)) 
+		os.mkdir(path)
+
 		# Save image to server
 		file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 		data = []	
@@ -65,17 +70,21 @@ class Retrieval(Resource):
 			response = self.build_response(3,data)
 			return response
 
+		# save image
+		image_detector.save_image(image, detection_results, path)
+
 		# Dominan Object
 		big_object = image_detector.get_biggest_box(detection_results['rois'])
-		cropped_object = image_detector.crop_object(image, big_object)
+		cropped_object = image_detector.crop_object(image, big_object, path)
 
 		# Extract
 		clear_session()
 		image_extractor = extractor.Extractor()
 		query_image_feature = image_extractor.extract_feat(cropped_object)
+		image_extractor.save_extracted_feat_as_image(query_feature, path)
 
 		# similarity
-		product_ids = self.compare_similarity(query_image_feature)
+		product_ids = self.calculate_similarity(query_image_feature, path)
 		length = len(product_ids)		
 		# there is no data			
 		if length == 0 :  
@@ -90,7 +99,7 @@ class Retrieval(Resource):
 		response = self.build_response(0,data)
 		return response
 
-	def compare_similarity(self, query_feature):
+	def calculate_similarity(self, query_feature, log_dir):
 		# open the product data extraction file
 		path = "../featureCNN_map.h5"
 		h5f = h5py.File(path,'r')
@@ -100,11 +109,11 @@ class Retrieval(Resource):
 		
 		# similarity
 		scores = np.dot(query_feature, feats.T)
-		id_rank = self.sort_by_score(id, scores)
+		id_rank = self.sort_by_score(id, scores, log_dir)
 		
 		return id_rank
 
-	def sort_by_score(self, id, scores):
+	def sort_by_score(self, id, scores, log_dir):
 		rank_ID = np.argsort(scores)[::-1]
 		rank_score = scores[rank_ID]
 		id_rank = id[rank_ID]
@@ -112,7 +121,11 @@ class Retrieval(Resource):
 		rank = np.r_[(rank_score>0.7).nonzero()]		
 
 		id_rank = id_rank[rank]
-
+		compare_result = re.sub(r' *\n *', '\n', 
+			np.array2string(np.c_[final_score, id_rank], precision=2,  suppress_small=True).replace('[', '').replace(']', '').strip())		
+		
+		f = open(os.path.join(log_dir, "result.txt"), "w+")
+		f.writelines(compare_result)
 		return id_rank
 
 	def build_response(self, index_message, data):
@@ -121,7 +134,7 @@ class Retrieval(Resource):
 		code = [200, 400, 400, 404] 		
 		
 		return {'data': data,
-				'message' : message[index_message]}, code[index_message]			
+			'message' : message[index_message]}, code[index_message]
 
 class ImageServer(Resource):
 	def get(self, filename):
