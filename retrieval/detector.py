@@ -5,6 +5,7 @@ import skimage.io
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import mrcnn.model as modellib
+from mrcnn import visualize
 import numpy as np
 
 # Path to Datasets
@@ -64,7 +65,6 @@ class Detector:
 		# Results
 		print("Cost time: ",end-start," (s)")
 		result = detection_results[0]
-		
 		return result
 
 
@@ -92,10 +92,25 @@ class Detector:
 				ix = i
 		return biggest_xy
 
-	def crop_object(self, img, xy):    
+	def save_cropped_image(self, image, image_dir, cropped):
+		saved_image = np.copy(image).astype('uint8') 
+		if cropped:
+			image_name = "cropped.png"
+		else:
+			image_name = "resized.png"
+
+		plt.imsave(os.path.join(image_dir, image_name), saved_image, cmap = plt.cm.gray)	
+
+	def crop_object(self, img, xy, image_dir):    
 		target = img[xy[0]:xy[2], xy[1]:xy[3], :]
+		self.save_cropped_image(target, image_dir, True)
 		# Resize to 224 x 224
 		resized = skimage.transform.resize(target, (224, 224), preserve_range=True)
-		return resized
+		self.save_cropped_image(resized, image_dir, False)
+		return resized	
 
+	def save_image(self, image, detection_result, image_dir):
+		visualize.save_image(image, "detection_result", detection_result['rois'], 
+			detection_result['masks'], detection_result['class_ids'], detection_result['scores'],
+			self.class_names, image_dir, mode=0)	
 
