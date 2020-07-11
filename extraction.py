@@ -9,14 +9,14 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
 # Local Import
-from server.database.database import DAO
-from server.database.model import Product
+from technical_service.database.database import DAO
+from technical_service.database.model import Product
 
-from retrieval.detector import Detector
-from retrieval.extractor import Extractor
+from domain.image.detector import Detector
+from domain.image.extractor import Extractor
 
 
-IMAGE_PATH = "server/image/product_images/"
+IMAGE_PATH = "domain/server/image/product_images/"
 
 if __name__ == '__main__':
 	database = DAO()
@@ -34,10 +34,12 @@ if __name__ == '__main__':
 	feats = []
 	ids = []
 
+	log_dir = os.path.join("logs", "extraction") 
+	os.mkdir(log_dir)
 	# Extractor using VGG16
 	modelVGG = Extractor()
 	# Detector
-	image_detector = Detector("weight/mask_rcnn_fashion.h5")
+	image_detector = Detector("weight/mask_rcnn_fashion.h5", "detection")
 
 	for product in products:
 		# Image
@@ -48,7 +50,7 @@ if __name__ == '__main__':
 			# Objek Dominan
 			big_box = image_detector.get_biggest_box(image_detection['rois'])
 			# Crop Image
-			image = image_detector.crop_object(image, big_box)
+			image = image_detector.crop_object(image, big_box, log_dir)
 			norm_feat = modelVGG.extract_feat(image)    
 			# Add feature and product id to array
 			feats.append(norm_feat)
