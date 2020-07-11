@@ -10,41 +10,37 @@ import numpy as np
 
 # Path to Datasets
 DEFAULT_DATASETS_DIR = os.path.join("", "../../../../datasets")
+DEFAULT_LOGS_DIR = os.path.join("", "logs/train")
+# Path to trained weights file
 
-sys.path.insert(0, "../")
-from config.dataset import FashionDataset
-from config.fashion_config import FashionConfig
+sys.path.insert(0, "../../")
+from technical_service.config.Dataset import FashionDataset
+from technical_service.config.fashion_config import FashionConfig
 
 class Detector:
-	def __init__(self, model_path):
-		config = FashionConfig()  
+	def __init__(self, model_path, mode):
+		self.config = FashionConfig()  
 
 		self.class_names = ['BG', 'top', 'long', 'bottom']
 		# Using GPU
-		with tf.device('/gpu:0'):
-			self.model = modellib.MaskRCNN(mode="inference", config=config, model_dir="")
-		
-		self.model.load_weights(model_path, by_name=True)
+		if(mode == "detection"):
+			with tf.device('/gpu:0'):
+				self.model = modellib.MaskRCNN(mode="inference", config=self.config, model_dir="")
+				self.model.load_weights(model_path, by_name=True)
+		else:
+			self.model = modellib.MaskRCNN(mode="training", config=self.config, model_dir=DEFAULT_LOGS_DIR)
+			self.model.load_weights(model_path, by_name=True, exclude=["mrcnn_class_logits", "mrcnn_bbox_fc", 
+				"mrcnn_bbox", "mrcnn_mask"]) 				
 
-	def train(self, model, config):    
-    	# Dataset
-		dataset_train = FashionDataset()
-		dataset_train.load_data(DEFAULT_DATASETS_DIR+"/train.json", DEFAULT_DATASETS_DIR+"/train")
-		dataset_train.prepare()
-
-		# Validation dataset
-		dataset_val = FashionDataset()
-		dataset_val.load_data(DEFAULT_DATASETS_DIR+"/validation.json", DEFAULT_DATASETS_DIR+"/val")
-		dataset_val.prepare()
-
+	def train(self, dataset_train, dataset_val):    
 	    # Training
 		print("Training network heads")
-		model.train(dataset_train, dataset_val, 
-			learning_rate=config.LEARNING_RATE,
+		self.model.train(dataset_train, dataset_val, 
+			learning_rate=self.config.LEARNING_RATE,
 			epochs=15, layers='heads')
 
-		model.train(dataset_train, dataset_val,
-			learning_rate=config.LEARNING_RATE / 10,
+		self.model.train(dataset_train, dataset_val,
+			learning_rate=self.config.LEARNING_RATE / 10,
 			epochs=30, layers="all")
 
 	def detection(self, image): 
@@ -68,23 +64,23 @@ class Detector:
 		return result
 
 
-	def get_width(self, xy):
-		width = abs(xy[1] - xy[3])
+	def get_width(self, detection_result):
+		width = abs(detection_result[1] - detection_result[3])
 		return width
 
-	def get_height(self, xy):
-		height = abs(xy[0] - xy[2])
+	def get_height(self, detection_result):
+		height = abs(detection_result[0] - detection_result[2])
 		return height
 
-	def get_area(self, xy):
-		width = self.get_width(xy)
-		height = self.get_height(xy)
+	def get_area(self, detection_result):
+		width = self.get_width(detection_result)
+		height = self.get_height(detection_result)
 		area = width * height
 		return area
 
-	def get_biggest_box(self, xy_list):
+	def get_biggest_box(self, detection_result_list):
 		biggest_area = 0
-		for i, xy in enumerate(xy_list):
+		for i, xy in enumerate(detection_result_list):
 			area = self.get_area(xy)
 			if area > biggest_area:
 				biggest_area = area
@@ -101,8 +97,8 @@ class Detector:
 
 		plt.imsave(os.path.join(image_dir, image_name), saved_image, cmap = plt.cm.gray)	
 
-	def crop_object(self, img, xy, image_dir):    
-		target = img[xy[0]:xy[2], xy[1]:xy[3], :]
+	def crop_object(self, img, detection_result, image_dir):    
+		target = img[detection_result[0]:detection_result[2], detection_result[1]:detection_result[3], :]
 		self.save_cropped_image(target, image_dir, True)
 		# Resize to 224 x 224
 		resized = skimage.transform.resize(target, (224, 224), preserve_range=True)
