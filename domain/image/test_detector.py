@@ -4,7 +4,7 @@ import numpy as np
 
 from detector import Detector
 
-detector = Detector("../weight/mask_rcnn_fashion.h5")
+detector = Detector("../weight/mask_rcnn_fashion.h5", "detection")
 image_input = [10,10,20,20]
 
 class TestDetector(unittest.TestCase):

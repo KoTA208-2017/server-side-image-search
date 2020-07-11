@@ -15,9 +15,9 @@ class FashionDataset(utils.Dataset):
             images_dir: The directory holding the images referred to by the json file
         """        
         dataset_json = os.path.exists(annotation_json)
-        images_dir = os.path.exists(images_dir)
+        check_images_dir = os.path.exists(images_dir)
 
-        if(not(images_dir) or not(dataset_json)):
+        if(not(check_images_dir) or not(dataset_json)):
             raise ValueError("Dataset Not Found")
         else:
             # Load json from file
