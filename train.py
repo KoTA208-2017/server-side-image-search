@@ -8,8 +8,9 @@ import skimage.draw
 import mrcnn.model as modellib
 from mrcnn.model import log
 
-from config.fashion_config import FashionConfig
-from retrieval.detector import Detector
+# from config.fashion_config import FashionConfig
+from domain.image.detector import Detector
+from technical_service.config.Dataset import FashionDataset
 
 # Path to trained weights file
 COCO_WEIGHTS_PATH = os.path.join("", "weight/mask_rcnn_coco.h5")
@@ -17,24 +18,19 @@ COCO_WEIGHTS_PATH = os.path.join("", "weight/mask_rcnn_coco.h5")
 # through the command line argument --logs
 DEFAULT_LOGS_DIR = os.path.join("", "logs")
 
+DEFAULT_DATASETS_DIR = os.path.join("", "../../../../datasets")
 
-if __name__ == '__main__':    
-    # Configurations    
-    config = FashionConfig()        
 
-    # Create model
-    model = modellib.MaskRCNN(mode="training", config=config,
-                                  model_dir=DEFAULT_LOGS_DIR)    
+if __name__ == '__main__':        
+    dataset_train = FashionDataset()
+    dataset_train.load_data(DEFAULT_DATASETS_DIR+"/train.json", DEFAULT_DATASETS_DIR+"/train")
+    dataset_train.prepare()
 
-    # Select weights file to load    
-    weights_path = COCO_WEIGHTS_PATH            
-    
-    # Exclude the last layers because they require a matching
-    # number of classes
-    model.load_weights(weights_path, by_name=True, exclude=[
-            "mrcnn_class_logits", "mrcnn_bbox_fc",
-            "mrcnn_bbox", "mrcnn_mask"])    
+        # # Validation dataset
+    dataset_val = FashionDataset()
+    dataset_val.load_data(DEFAULT_DATASETS_DIR+"/validation.json", DEFAULT_DATASETS_DIR+"/val")
+    dataset_val.prepare()
 
     # Train
-    detector = Detector("weight/mask_rcnn_fashion.h5")
-    detector.train(model, config)    
+    detector = Detector(COCO_WEIGHTS_PATH, "training")
+    detector.train(dataset_train, dataset_val)    
