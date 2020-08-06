@@ -128,7 +128,7 @@ class Retrieval(Resource):
 		rank_score = scores[rank_ID]
 		id_rank = id[rank_ID]
 		# score > 0.7
-		rank = np.r_[(rank_score>0.7).nonzero()]
+		rank = np.r_[(rank_score>0.5).nonzero()]
 		final_score = rank_score[rank]		
 
 		id_rank = id_rank[rank]
