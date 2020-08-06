@@ -8,7 +8,7 @@ import re
 from keras.backend import clear_session
 import urllib.request
 from app import app
-from flask_ngrok import run_with_ngrok
+# from flask_ngrok import run_with_ngrok
 from flask import Flask, request, redirect, jsonify, send_from_directory
 from flask_restful import Api, Resource
 from werkzeug.utils import secure_filename
@@ -20,7 +20,7 @@ import extractor
 sys.path.insert(0, "../../technical_service")
 from database.database import DAO
 
-run_with_ngrok(app)
+# run_with_ngrok(app)
 api = Api(app)
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
@@ -156,4 +156,4 @@ api.add_resource(Retrieval, '/retrieval/image', endpoint='retrieval')
 api.add_resource(ImageServer, '/image/<string:filename>', endpoint='image')
 
 if __name__ == "__main__":
-    app.run() 
+    app.run(host="0.0.0.0", debug=True) 
